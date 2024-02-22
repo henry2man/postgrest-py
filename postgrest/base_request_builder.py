@@ -113,7 +113,6 @@ def pre_update(
         prefer_headers.append(f"count={count}")
     if missing:
         prefer_headers.append(f"missing={missing}")
-
     headers = Headers({"Prefer": ",".join(prefer_headers)})
     return QueryArgs(RequestMethod.PATCH, QueryParams(), headers, json)
 
