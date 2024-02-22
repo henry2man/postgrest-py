@@ -310,6 +310,7 @@ class AsyncRequestBuilder(Generic[_ReturnT]):
             json,
             count=count,
             returning=returning,
+            
             upsert=upsert,
         )
         return AsyncQueryRequestBuilder[_ReturnT](

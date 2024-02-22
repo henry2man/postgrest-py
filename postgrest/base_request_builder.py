@@ -33,7 +33,7 @@ except ImportError:
     # < 2.0.0
     from pydantic import validator as field_validator
 
-from .types import CountMethod, Filters, RequestMethod, ReturnMethod
+from .types import CountMethod, Filters, RequestMethod, ReturnMethod, PreferMissing
 from .utils import AsyncClient, SyncClient, get_origin_and_cast, sanitize_param
 
 
@@ -64,6 +64,7 @@ def pre_insert(
     *,
     count: Optional[CountMethod],
     returning: ReturnMethod,
+    missing: Optional[PreferMissing],
     upsert: bool,
 ) -> QueryArgs:
     prefer_headers = [f"return={returning}"]
@@ -71,6 +72,8 @@ def pre_insert(
         prefer_headers.append(f"count={count}")
     if upsert:
         prefer_headers.append("resolution=merge-duplicates")
+    if missing:
+        prefer_headers.append(f"missing={missing}")
     headers = Headers({"Prefer": ",".join(prefer_headers)})
     return QueryArgs(RequestMethod.POST, QueryParams(), headers, json)
 
@@ -80,6 +83,7 @@ def pre_upsert(
     *,
     count: Optional[CountMethod],
     returning: ReturnMethod,
+    missing: Optional[PreferMissing],
     ignore_duplicates: bool,
     on_conflict: str = "",
 ) -> QueryArgs:
@@ -87,6 +91,8 @@ def pre_upsert(
     prefer_headers = [f"return={returning}"]
     if count:
         prefer_headers.append(f"count={count}")
+    if missing:
+        prefer_headers.append(f"missing={missing}")
     resolution = "ignore" if ignore_duplicates else "merge"
     prefer_headers.append(f"resolution={resolution}-duplicates")
     headers = Headers({"Prefer": ",".join(prefer_headers)})
@@ -100,10 +106,14 @@ def pre_update(
     *,
     count: Optional[CountMethod],
     returning: ReturnMethod,
+    missing: Optional[PreferMissing],
 ) -> QueryArgs:
     prefer_headers = [f"return={returning}"]
     if count:
         prefer_headers.append(f"count={count}")
+    if missing:
+        prefer_headers.append(f"missing={missing}")
+
     headers = Headers({"Prefer": ",".join(prefer_headers)})
     return QueryArgs(RequestMethod.PATCH, QueryParams(), headers, json)
 

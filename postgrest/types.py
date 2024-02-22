@@ -56,3 +56,8 @@ class RequestMethod(StrEnum):
 class ReturnMethod(StrEnum):
     minimal = "minimal"
     representation = "representation"
+
+
+class PreferMissing(StrEnum):
+    default = "default"
+    null = "null"
