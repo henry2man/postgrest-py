@@ -19,7 +19,7 @@ from ..base_request_builder import (
     pre_upsert,
 )
 from ..exceptions import APIError, generate_default_error_message
-from ..types import ReturnMethod
+from ..types import PreferMissing, ReturnMethod
 from ..utils import SyncClient, get_origin_and_cast
 
 _ReturnT = TypeVar("_ReturnT")
@@ -294,6 +294,7 @@ class SyncRequestBuilder(Generic[_ReturnT]):
         *,
         count: Optional[CountMethod] = None,
         returning: ReturnMethod = ReturnMethod.representation,
+        missing: Optional[PreferMissing] = None,
         upsert: bool = False,
     ) -> SyncQueryRequestBuilder[_ReturnT]:
         """Run an INSERT query.
@@ -310,6 +311,7 @@ class SyncRequestBuilder(Generic[_ReturnT]):
             json,
             count=count,
             returning=returning,
+            missing=missing,
             upsert=upsert,
         )
         return SyncQueryRequestBuilder[_ReturnT](
@@ -322,6 +324,7 @@ class SyncRequestBuilder(Generic[_ReturnT]):
         *,
         count: Optional[CountMethod] = None,
         returning: ReturnMethod = ReturnMethod.representation,
+        missing: Optional[PreferMissing] = None,
         ignore_duplicates: bool = False,
         on_conflict: str = "",
     ) -> SyncQueryRequestBuilder[_ReturnT]:
@@ -340,6 +343,7 @@ class SyncRequestBuilder(Generic[_ReturnT]):
             json,
             count=count,
             returning=returning,
+            missing=missing,
             ignore_duplicates=ignore_duplicates,
             on_conflict=on_conflict,
         )
@@ -353,6 +357,7 @@ class SyncRequestBuilder(Generic[_ReturnT]):
         *,
         count: Optional[CountMethod] = None,
         returning: ReturnMethod = ReturnMethod.representation,
+        missing: Optional[PreferMissing] = None,
     ) -> SyncFilterRequestBuilder[_ReturnT]:
         """Run an UPDATE query.
 
@@ -367,6 +372,7 @@ class SyncRequestBuilder(Generic[_ReturnT]):
             json,
             count=count,
             returning=returning,
+            missing=missing,
         )
         return SyncFilterRequestBuilder[_ReturnT](
             self.session, self.path, method, headers, params, json
