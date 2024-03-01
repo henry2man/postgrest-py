@@ -139,17 +139,30 @@ class TestExplain:
     def test_explain_plain(self, request_builder: AsyncRequestBuilder):
         builder = request_builder.select("*").explain()
         assert builder.params["select"] == "*"
-        assert "application/vnd.pgrst.plan+" in str(builder.headers.get("accept"))
+        assert "application/vnd.pgrst.plan" in str(builder.headers.get("accept"))
 
     def test_explain_options(self, request_builder: AsyncRequestBuilder):
         builder = request_builder.select("*").explain(
             format="json", analyze=True, verbose=True, buffers=True, wal=True
         )
         assert builder.params["select"] == "*"
-        assert "application/vnd.pgrst.plan+json" in str(builder.headers.get("accept"))
-        assert 'options="analyze|verbose|buffers|wal;' in str(
-            builder.headers.get("accept")
-        )
+        assert "application/vnd.pgrst.plan+json;" in str(builder.headers.get("accept"))
+        assert "options=analyze|verbose|buffers|wal" in str(builder.headers.get("accept"))
+
+
+class TestRange:
+    def test_range_on_own_table(self, request_builder: AsyncRequestBuilder):
+        builder = request_builder.select("*").range(0, 1)
+        assert builder.params["select"] == "*"
+        assert builder.params["limit"] == "2"
+        assert builder.params["offset"] == "0"
+
+    def test_range_on_foreign_table(self, request_builder: AsyncRequestBuilder):
+        foreign_table = "cities"
+        builder = request_builder.select("*").range(1, 2, foreign_table)
+        assert builder.params["select"] == "*"
+        assert builder.params[f"{foreign_table}.limit"] == "2"
+        assert builder.params[f"{foreign_table}.offset"] == "1"
 
 
 @pytest.fixture

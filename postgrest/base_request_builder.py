@@ -9,6 +9,7 @@ from typing import (
     Generic,
     Iterable,
     List,
+    Literal,
     NamedTuple,
     Optional,
     Tuple,
@@ -512,7 +513,7 @@ class BaseSelectRequestBuilder(BaseFilterRequestBuilder[_ReturnT]):
         settings: bool = False,
         buffers: bool = False,
         wal: bool = False,
-        format: str = "",
+        format: Literal["text", "json"] = "text",
     ) -> Self:
         options = [
             key
@@ -520,8 +521,9 @@ class BaseSelectRequestBuilder(BaseFilterRequestBuilder[_ReturnT]):
             if key not in ["self", "format"] and value
         ]
         options_str = "|".join(options)
-        options_str = f'options="{options_str};"' if options_str else ""
-        self.headers["Accept"] = f"application/vnd.pgrst.plan+{format}; {options_str}"
+        self.headers[
+            "Accept"
+        ] = f"application/vnd.pgrst.plan+{format}; options={options_str}"
         return self
 
     def order(
@@ -574,7 +576,64 @@ class BaseSelectRequestBuilder(BaseFilterRequestBuilder[_ReturnT]):
         )
         return self
 
-    def range(self: Self, start: int, end: int) -> Self:
-        self.headers["Range-Unit"] = "items"
-        self.headers["Range"] = f"{start}-{end - 1}"
+    def range(
+        self: Self, start: int, end: int, foreign_table: Optional[str] = None
+    ) -> Self:
+        self.params = self.params.add(
+            f"{foreign_table}.offset" if foreign_table else "offset", start
+        )
+        self.params = self.params.add(
+            f"{foreign_table}.limit" if foreign_table else "limit",
+            end - start + 1,
+        )
+        return self
+
+
+class BaseRPCRequestBuilder(BaseSelectRequestBuilder[_ReturnT]):
+    def __init__(
+        self,
+        session: Union[AsyncClient, SyncClient],
+        headers: Headers,
+        params: QueryParams,
+    ) -> None:
+        # Generic[T] is an instance of typing._GenericAlias, so doing Generic[T].__init__
+        # tries to call _GenericAlias.__init__ - which is the wrong method
+        # The __origin__ attribute of the _GenericAlias is the actual class
+        get_origin_and_cast(BaseSelectRequestBuilder[_ReturnT]).__init__(
+            self, session, headers, params
+        )
+
+    def select(
+        self,
+        *columns: str,
+    ) -> Self:
+        """Run a SELECT query.
+
+        Args:
+            *columns: The names of the columns to fetch.
+        Returns:
+            :class:`BaseSelectRequestBuilder`
+        """
+        method, params, headers, json = pre_select(*columns, count=None)
+        self.params = self.params.add("select", params.get("select"))
+        self.headers["Prefer"] = "return=representation"
+        return self
+
+    def single(self) -> Self:
+        """Specify that the query will only return a single row in response.
+
+        .. caution::
+            The API will raise an error if the query returned more than one row.
+        """
+        self.headers["Accept"] = "application/vnd.pgrst.object+json"
+        return self
+
+    def maybe_single(self) -> Self:
+        """Retrieves at most one row from the result. Result must be at most one row (e.g. using `eq` on a UNIQUE column), otherwise this will result in an error."""
+        self.headers["Accept"] = "application/vnd.pgrst.object+json"
+        return self
+
+    def csv(self) -> Self:
+        """Specify that the query must retrieve data as a single CSV string."""
+        self.headers["Accept"] = "text/csv"
         return self

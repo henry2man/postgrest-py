@@ -2,9 +2,57 @@
 
 
 
+## v0.16.1 (2024-02-29)
+
+### Chore
+
+* chore(deps): bump pydantic from 2.5.3 to 2.6.2 (#374)
+
+Signed-off-by: dependabot[bot] &lt;support@github.com&gt;
+Co-authored-by: dependabot[bot] &lt;49699333+dependabot[bot]@users.noreply.github.com&gt; ([`b858685`](https://github.com/supabase-community/postgrest-py/commit/b858685c52291aba780d2db3626c6d618b826d1a))
+
+### Fix
+
+* fix: explain functionality to show results (#371)
+
+Co-authored-by: Rodrigo Mansueli Nunes &lt;rodrigo@mansueli.com&gt; ([`3e0ea2e`](https://github.com/supabase-community/postgrest-py/commit/3e0ea2ef54fb2b50d4e5cb5619abc1c96471836f))
+
+### Test
+
+* test: remove skip from rpc with range test (#376) ([`a3fc560`](https://github.com/supabase-community/postgrest-py/commit/a3fc56044ed26eefdde3dea18353ad7cc2f03b2c))
+
+### Unknown
+
+* Bump action versions (#377) ([`602d66e`](https://github.com/supabase-community/postgrest-py/commit/602d66e6e40402281aa388a3bb9e8ddef6d5c718))
+
+
+## v0.16.0 (2024-02-27)
+
+### Chore
+
+* chore(release): bump version to v0.16.0 ([`3dc51d4`](https://github.com/supabase-community/postgrest-py/commit/3dc51d4859721c99a8c7c69d4fe144ff37d9e16f))
+
+### Feature
+
+* feat: Add RPC request builder class for additional filters (#372) ([`0002e8f`](https://github.com/supabase-community/postgrest-py/commit/0002e8f7ec32b6787b44996079b4c2f43fc43717))
+
+
+## v0.15.1 (2024-02-27)
+
+### Chore
+
+* chore(release): bump version to v0.15.1 ([`6d55e49`](https://github.com/supabase-community/postgrest-py/commit/6d55e49b461fd0b52e9267a6b1e47038756bfd7f))
+
+### Fix
+
+* fix: update range to use query parameters instead of headers (#375) ([`eae612c`](https://github.com/supabase-community/postgrest-py/commit/eae612ce0548b392d574e9afc12c11f73e54cf8f))
+
+
 ## v0.15.0 (2024-01-15)
 
 ### Chore
+
+* chore(release): bump version to v0.15.0 ([`0faa8c3`](https://github.com/supabase-community/postgrest-py/commit/0faa8c3f37cb1f360f65dcef075479c297029844))
 
 * chore(deps-dev): bump pytest-asyncio from 0.18.3 to 0.23.3 (#344)
 

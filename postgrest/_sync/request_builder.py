@@ -9,6 +9,7 @@ from pydantic import ValidationError
 from ..base_request_builder import (
     APIResponse,
     BaseFilterRequestBuilder,
+    BaseRPCRequestBuilder,
     BaseSelectRequestBuilder,
     CountMethod,
     SingleAPIResponse,
@@ -62,9 +63,16 @@ class SyncQueryRequestBuilder(Generic[_ReturnT]):
             headers=self.headers,
         )
         try:
-            if (
-                200 <= r.status_code <= 299
-            ):  # Response.ok from JS (https://developer.mozilla.org/en-US/docs/Web/API/Response/ok)
+            if r.is_success:
+                if self.http_method != "HEAD":
+                    body = r.text
+                    if self.headers.get("Accept") == "text/csv":
+                        return body
+                    if self.headers.get(
+                        "Accept"
+                    ) and "application/vnd.pgrst.plan" in self.headers.get("Accept"):
+                        if not "+json" in self.headers.get("Accept"):
+                            return body
                 return APIResponse[_ReturnT].from_http_request_response(r)
             else:
                 raise APIError(r.json())
@@ -164,7 +172,7 @@ class SyncFilterRequestBuilder(BaseFilterRequestBuilder[_ReturnT], SyncQueryRequ
 
 # this exists for type-safety. see https://gist.github.com/anand2312/93d3abf401335fd3310d9e30112303bf
 class SyncRPCFilterRequestBuilder(
-    BaseFilterRequestBuilder[_ReturnT], SyncSingleRequestBuilder[_ReturnT]
+    BaseRPCRequestBuilder[_ReturnT], SyncSingleRequestBuilder[_ReturnT]
 ):
     def __init__(
         self,
@@ -399,6 +407,3 @@ class SyncRequestBuilder(Generic[_ReturnT]):
         return SyncFilterRequestBuilder[_ReturnT](
             self.session, self.path, method, headers, params, json
         )
-
-    def stub(self):
-        return None
